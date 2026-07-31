@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "BrowserEye",
+  "version": "1.0.0",
+  "description": "BrowserEye project setup setup",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
