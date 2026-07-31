@@ -3,6 +3,9 @@
   "name": "BrowserEye",
   "version": "1.0.0",
   "description": "BrowserEye project setup setup",
+  "permissions": [
+    "tabs"
+  ],
   "action": {
     "default_popup": "index.html"
   },
