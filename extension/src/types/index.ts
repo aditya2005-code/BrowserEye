@@ -11,4 +11,8 @@ export interface PageSession {
   keystrokeCount: number;
   maxScrollDepth: number;
   tabSwitchCount: number;
+  screenshot?: string;
+  screenshotCaptured?: boolean;
+  aiSummary?: string | null;
+  category?: string | null;
 }
