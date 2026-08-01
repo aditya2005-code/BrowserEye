@@ -82,4 +82,7 @@ window.addEventListener('beforeunload', () => {
   sendMetricsUpdate(true);
 });
 
+// Emits load initialization event to the background script
+chrome.runtime.sendMessage({ type: 'PAGE_INITIALIZED' }).catch(() => {});
+
 console.log('BrowserEye Interaction Content Script Initialised');

@@ -18,20 +18,27 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   }
 });
 
-// 2. Handle Tab Switch (Activation)
 chrome.tabs.onActivated.addListener((activeInfo) => {
   const newTabId = activeInfo.tabId;
 
-  if (lastActiveTabId !== null && lastActiveTabId !== newTabId) {
-    sessionManager.pauseSession(lastActiveTabId);
-  }
-
   chrome.tabs.get(newTabId, (tab) => {
     if (chrome.runtime.lastError) return;
-    if (isValidTab(tab)) {
-      lastActiveTabId = newTabId;
-      sessionManager.startSession(newTabId, tab.url!, tab.title || '');
-    }
+
+    chrome.windows.getLastFocused((focusedWindow) => {
+      if (chrome.runtime.lastError) return;
+
+      // Only transition tracking if the tab belongs to the currently focused window
+      if (tab.windowId === focusedWindow.id && focusedWindow.focused) {
+        if (lastActiveTabId !== null && lastActiveTabId !== newTabId) {
+          sessionManager.pauseSession(lastActiveTabId);
+        }
+
+        if (isValidTab(tab)) {
+          lastActiveTabId = newTabId;
+          sessionManager.startSession(newTabId, tab.url!, tab.title || '');
+        }
+      }
+    });
   });
 });
 
@@ -79,11 +86,21 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
 
 // 6. Receive User Interaction Metrics from Content Scripts
 chrome.runtime.onMessage.addListener((message: ExtensionMessage, sender, sendResponse) => {
-  if (message && message.type === 'INTERACTION_UPDATE') {
-    const tabId = sender.tab?.id;
-    if (tabId !== undefined) {
-      const { clickCount, keystrokeCount, maxScrollDepth } = message.payload;
-      sessionManager.updateInteractions(tabId, clickCount, keystrokeCount, maxScrollDepth);
+  if (message) {
+    if (message.type === 'INTERACTION_UPDATE') {
+      const tabId = sender.tab?.id;
+      if (tabId !== undefined) {
+        const { clickCount, keystrokeCount, maxScrollDepth } = message.payload;
+        sessionManager.updateInteractions(tabId, clickCount, keystrokeCount, maxScrollDepth);
+      }
+    } else if (message.type === 'PAGE_INITIALIZED') {
+      const tabId = sender.tab?.id;
+      // If the tab is currently active, reload session to preserve metric aggregates
+      if (tabId !== undefined && sender.tab?.url && sender.tab.active) {
+        sessionManager.endSession(tabId);
+        lastActiveTabId = tabId;
+        sessionManager.startSession(tabId, sender.tab.url, sender.tab.title || '');
+      }
     }
   }
   sendResponse({ status: 'ok' });
