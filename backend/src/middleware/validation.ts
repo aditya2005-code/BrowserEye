@@ -45,6 +45,15 @@ export function validateSessionPayload(req: Request, res: Response, next: NextFu
   validateDate('startTime');
   validateDate('endTime');
 
+  // Check chronological order of dates
+  if (body.startTime && body.endTime) {
+    const startTs = Date.parse(body.startTime);
+    const endTs = Date.parse(body.endTime);
+    if (!isNaN(startTs) && !isNaN(endTs) && endTs < startTs) {
+      errors.push("Field 'endTime' must be greater than or equal to 'startTime'");
+    }
+  }
+
   if (errors.length > 0) {
     res.status(400).json({
       success: false,
