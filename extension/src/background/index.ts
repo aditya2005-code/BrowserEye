@@ -95,9 +95,8 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, sender, sendRes
       }
     } else if (message.type === 'PAGE_INITIALIZED') {
       const tabId = sender.tab?.id;
-      // If the tab is currently active, reload session to preserve metric aggregates
+      // Delegate load to startSession which validates same-domain or changes
       if (tabId !== undefined && sender.tab?.url && sender.tab.active) {
-        sessionManager.endSession(tabId);
         lastActiveTabId = tabId;
         sessionManager.startSession(tabId, sender.tab.url, sender.tab.title || '');
       }

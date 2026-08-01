@@ -15,4 +15,7 @@ export interface PageSession {
   screenshotCaptured?: boolean;
   aiSummary?: string | null;
   category?: string | null;
+  clicksBase?: number;
+  keystrokesBase?: number;
+  scrollDepthBase?: number;
 }

@@ -47,12 +47,25 @@ class SessionManager {
       }
     }
 
-    // If an active session already exists but has a different URL, end it first
+    // Check if an active session already exists for this tab
     const existingSession = this.activeSessions.get(tabId);
     if (existingSession) {
-      if (existingSession.url !== url) {
+      const newDomain = getDomain(url);
+      if (existingSession.website !== newDomain) {
+        // Website domain changed! End the old session first.
         this.endSession(tabId);
       } else {
+        // User remains on the same website! Continue the session.
+        // Update to the latest URL and Page Title visited before closing/switching.
+        existingSession.url = url;
+        existingSession.title = title;
+
+        // Save current metrics as base values to accumulate subsequent metrics correctly
+        existingSession.clicksBase = existingSession.clickCount;
+        existingSession.keystrokesBase = existingSession.keystrokeCount;
+        existingSession.scrollDepthBase = existingSession.maxScrollDepth;
+
+        console.log(`[SessionManager] Same domain navigation. Continuing session ${existingSession.id} on ${existingSession.website}. URL updated to: ${url}`);
         return existingSession;
       }
     }
@@ -155,9 +168,10 @@ class SessionManager {
     const session = this.activeSessions.get(tabId);
     if (!session) return;
 
-    session.clickCount = clickCount;
-    session.keystrokeCount = keystrokeCount;
-    session.maxScrollDepth = Math.max(session.maxScrollDepth, maxScrollDepth);
+    // Accumulate metrics relative to baselines captured during in-place page loads
+    session.clickCount = (session.clicksBase || 0) + clickCount;
+    session.keystrokeCount = (session.keystrokesBase || 0) + keystrokeCount;
+    session.maxScrollDepth = Math.max(session.scrollDepthBase || 0, maxScrollDepth);
     
     console.log(
       `[SessionManager] Updated interactions for tab ${tabId}: ` +
