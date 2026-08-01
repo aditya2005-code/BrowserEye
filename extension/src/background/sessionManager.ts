@@ -1,5 +1,6 @@
 import { PageSession } from '../types';
 import { getDomain } from '../utils/url';
+import { sendSessionToBackend } from '../api/sessionApi';
 
 class SessionManager {
   // In-memory store of currently tracking page sessions
@@ -104,8 +105,8 @@ class SessionManager {
     session.endTime = endTime;
     session.duration = Math.max(0, endTime - session.startTime);
 
-    // Output complete session object to the console
-    console.log('Complete Session Object:', session);
+    // Send completed session to Express backend
+    sendSessionToBackend(session);
 
     this.activeSessions.delete(tabId);
   }
