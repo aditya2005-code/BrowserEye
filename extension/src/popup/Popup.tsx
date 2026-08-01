@@ -16,7 +16,7 @@ interface Session {
   category: string | null;
 }
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = 'https://browsereye.onrender.com';
 
 /**
  * Returns the local date in YYYY-MM-DD format.

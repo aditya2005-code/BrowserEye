@@ -13,7 +13,7 @@ export interface CreateSessionInput {
   tabSwitches: number;
 }
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = 'https://browsereye.onrender.com';
 
 /**
  * Sends a completed tracking session to the Express backend.
