@@ -6,3 +6,21 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+model Session {
+  id             String   @id @default(uuid()) @db.Uuid
+  website        String
+  url            String
+  pageTitle      String
+  startTime      DateTime
+  endTime        DateTime
+  duration       Int
+  clicks         Int
+  keystrokes     Int
+  scrollDepth    Int
+  tabSwitches    Int
+  aiSummary      String?
+  category       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
